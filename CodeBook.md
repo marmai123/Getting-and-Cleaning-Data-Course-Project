@@ -96,5 +96,6 @@ data is aggregated over subject and activity and mean is claculated. THe data is
 ```{r}
 tidy_data <- aggregate(data_new[,3:81], by = list(subject = data_new$subject, activity = data_new$activity), FUN = mean)
 tidy_data table is exported as 'TidyData.txt'
-write.table(tidy_data,"TidyData.txt")
+write.table(tidy_data,"TidyData.txt",  row.name=FALSE)
 ```
+
