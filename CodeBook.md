@@ -9,62 +9,79 @@ The data has been downloaded and unzipped to the folder 'UCI HAR Dataset' and is
 
 The data is downloaded and stored in variables (step 0) and then proceesed in five steps:
 
-# Step 0. Download data and store in variables 
+### Step 0. Download data and store in variables 
 
-## The data is downloaded from  http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones, stoed in folder 'data' and unzipped to folder 'UCI HAR Dataset'
+The data is downloaded from  http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones, stored in folder 'data' and unzipped to folder 'UCI HAR Dataset'
+```{r}
 if(!file.exists("data")){
         dir.create("data")
 }
 url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
 download.file(url,destfile = "./data/mydata.zip")
 unzip("mydata.zip")
-
-## Variable names (features) are downloaded from the features.txt file. Column 1 is removed containing numbering.
+```
+Variable names (features) are downloaded from the features.txt file. Column 1 is removed containing numbering.
+```{r}
 features <- read.csv("./UCI HAR Dataset/features.txt", header = FALSE, sep = " ")
 features <- features[,2]
+```
 
-### test data is downloaded from 'test' folder:
+test data is downloaded from 'test' folder:
+```{r}
 test_data <- read.table("./UCI HAR Dataset/test/X_test.txt")
-### test labels including type of activity performed is downloaded for test data:
+test labels including type of activity performed is downloaded for test data:
 test_labels <- read.table("./UCI HAR Dataset/test/y_test.txt")
-### test subject indicating the person involved in the experiment is downloaed for test data:
+test subject indicating the person involved in the experiment is downloaed for test data:
 test_subject <- read.table("./UCI HAR Dataset/test/subject_test.txt")
-
-### train data is downloaded from 'train' folder:
+```
+train data is downloaded from 'train' folder:
+```{r}
 train_data <- read.table("./UCI HAR Dataset/train/X_train.txt")
-### train labels including type of activity performed is downloaded for train data:
+train labels including type of activity performed is downloaded for train data:
 train_labels <- read.table("./UCI HAR Dataset/train/y_train.txt")
-### test subject indicating the person involved in the experiment is downloaed for train data:
+test subject indicating the person involved in the experiment is downloaed for train data:
 train_subject <- read.table("./UCI HAR Dataset/train/subject_train.txt")
-
-## Variable names are added to test and train data
+```
+Variable names are added to test and train data:
+```{r}
 names(test_data) = features
 names(train_data) = features
-
-## Labels and subject ia appended to test and train data, heading is removed.
+```
+Labels and subject ia appended to test and train data, heading is removed.
+```{r}
 test_data$activity <- test_labels[,1]
 test_data$subject <- test_subject[,1]
 train_data$activity <- train_labels[,1]
 train_data$subject <- train_subject[,1]
+```
 
-# Step 1. Merge the training and the test sets to create one data set.
-## test and train data is merged to table data
+### Step 1. Merge the training and the test sets to create one data set.
+test and train data is merged to table data.
+```{r}
 data <- rbind(test_data,train_data)
+```
 
-# Step 2. Extract only the measurements on the mean and standard deviation for each measurement.
-## On top of subject and activity, only varaibles calculating mean and standard deviation (std) are selected from data table. Data is stored in data_new table.
+### Step 2. Extract only the measurements on the mean and standard deviation for each measurement.
+On top of subject and activity, only varaibles calculating mean and standard deviation (std) are selected from data table. Data is stored in data_new table.
+```{r}
 data_new <- select(data,c(subject,activity,contains("mean"),contains("std")))
-## Remove Angle variables
+```
+Remove Angle variables
+```{r}
 data_new <- select(data_new, !contains("angle"))
+````
 
-# step 3. Use descriptive activity names to name the activities in the data set.
-## Replace activity coding with activity names in data_new table
+### step 3. Use descriptive activity names to name the activities in the data set.
+Replace activity coding with activity names in data_new table
+```{r}
 activities <- read.table("./UCI HAR Dataset/activity_labels.txt")
 activities <- activities[,2]
 data_new$activity <- activities[data_new$activity]
+```
 
-# Step 4. Appropriately labels the data set with descriptive variable names.
-## Variable names are changed to clear understandable names. Shortenings are spelled with full name.
+### Step 4. Appropriately labels the data set with descriptive variable names.
+Variable names are changed to clear understandable names. Shortenings are spelled with full name.
+```{r}
 names_new <- names(data_new)
 names_new <- gsub("Freq","Frequency",names_new)
 names_new <- gsub("Acc","Acceleration",names_new)
@@ -72,10 +89,12 @@ names_new <- gsub("std","StandardDeviation",names_new)
 names_new <- gsub("^t","TimeDomain_",names_new)
 names_new <- gsub("^f","FrequencyDomain_",names_new)
 names(data_new) <- names_new
+```
 
-
-# Step 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
-## data is aggregated over subject and activity and mean is claculated. THe data is sored in tidy_data table. 
+### Step 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+data is aggregated over subject and activity and mean is claculated. THe data is sored in tidy_data table.
+```{r}
 tidy_data <- aggregate(data_new[,3:81], by = list(subject = data_new$subject, activity = data_new$activity), FUN = mean)
-## tidy_data table is exported as 'TidyData.txt'
+tidy_data table is exported as 'TidyData.txt'
 write.table(tidy_data,"TidyData.txt")
+```
